@@ -1,0 +1,404 @@
+
+
+
+***8-12-25 remove and Add is working
+
+import pandas as pd
+import tkinter as tk
+from tkinter import filedialog
+import dash
+from dash import dcc, html, Output, Input, State, ctx
+from dash.dependencies import MATCH, ALL
+import plotly.express as px
+import sys
+import uuid
+
+# ------------------ FILE SELECTION ------------------
+def select_excel_file():
+    root = tk.Tk()
+    root.withdraw()
+    file_path = filedialog.askopenfilename(
+        title="Select Excel File",
+        filetypes=[("Excel files", "*.xlsx *.xls")]
+    )
+    return file_path
+
+file_path = select_excel_file()
+if not file_path:
+    print("❌ No file selected. Exiting.")
+    sys.exit()
+
+try:
+    df = pd.read_excel(file_path)
+except Exception as e:
+    print(f"❌ Error reading Excel file: {e}")
+    sys.exit()
+
+if df.empty:
+    print("❌ Excel file is empty.")
+    sys.exit()
+
+column_options = [{"label": col, "value": col} for col in df.columns]
+
+# ------------------ APP INIT ------------------
+app = dash.Dash(__name__)
+app.title = "📊 Advanced Multi-Chart Viewer"
+
+# ------------------ CHART BLOCK ------------------
+def create_chart_block(chart_id):
+    return html.Div([
+
+        dcc.Store(
+            id={'type': 'chart-store', 'index': chart_id},
+            data={
+                'selected_columns': [df.columns[0]],
+                'chart_type': 'bar',
+                'mapping': '',
+                'color_input': '',
+                'selected_values': [],
+                'display_mode': 'frequency'
+            }
+        ),
+        
+        html.Div([
+            html.Button(
+                "❌ Remove Chart",
+                id={'type': 'remove-chart-btn', 'index': chart_id},
+                n_clicks=0,
+                style={
+                    "marginBottom": "10px",
+                    "backgroundColor": "#e74c3c",
+                    "color": "white",
+                    "border": "none",
+                    "padding": "5px 10px",
+                    "cursor": "pointer",
+                    "borderRadius": "5px",
+                    "fontWeight": "bold"
+                }
+            ),
+        ], style={"textAlign": "right"}),
+
+        html.Hr(),
+
+        html.Div([
+            html.Div([
+                html.Label("Select Columns:"),
+                dcc.Dropdown(
+                    id={'type': 'columns-dropdown', 'index': chart_id},
+                    options=column_options,
+                    value=[df.columns[0]],
+                    multi=True,
+                    style={"width": "220px"}
+                ),
+            ], style={"marginRight": "20px"}),
+
+            html.Div([
+                html.Label("Chart Type:"),
+                dcc.Dropdown(
+                    id={'type': 'chart-type-dropdown', 'index': chart_id},
+                    options=[
+                        {"label": "Bar Chart", "value": "bar"},
+                        {"label": "Column Chart", "value": "column"},
+                        {"label": "Pie Chart", "value": "pie"},
+                        {"label": "Donut Chart", "value": "donut"},
+                        {"label": "Table", "value": "table"},
+                        {"label": "KPI", "value": "kpi"},
+                    ],
+                    value='bar',
+                    clearable=False,
+                    style={"width": "180px"}
+                ),
+            ], style={"marginRight": "20px"}),
+
+            html.Div([
+                html.Label("Manual Mapping:"),
+                dcc.Input(
+                    id={'type': 'value-mapping-input', 'index': chart_id},
+                    type='text',
+                    placeholder="1=Male, 2=Female",
+                    style={"width": "200px"}
+                ),
+            ], style={"marginRight": "20px"}),
+
+            html.Div([
+                html.Label("Custom Colors:"),
+                dcc.Input(
+                    id={'type': 'color-input', 'index': chart_id},
+                    type='text',
+                    placeholder="#FF0000, #00FF00",
+                    style={"width": "200px"}
+                ),
+            ])
+        ], style={"display": "flex", "flexWrap": "wrap", "justifyContent": "center"}),
+
+        html.Div([
+            html.Label("Filter Specific Values (optional):"),
+            dcc.Dropdown(
+                id={'type': 'value-filter-dropdown', 'index': chart_id},
+                multi=True,
+                placeholder="Select values to include..."
+            ),
+        ], style={"width": "400px", "margin": "10px auto"}),
+
+        html.Div([
+            html.Label("Display Mode:"),
+            dcc.RadioItems(
+                id={'type': 'display-mode-radio', 'index': chart_id},
+                options=[
+                    {'label': 'Frequency', 'value': 'frequency'},
+                    {'label': 'Percentage', 'value': 'percentage'},
+                ],
+                value='frequency',
+                labelStyle={'display': 'inline-block', 'marginRight': '20px'}
+            )
+        ], style={"textAlign": "center", "marginBottom": "10px"}),
+
+        html.Div(id={'type': 'chart-container', 'index': chart_id}, children=[
+            dcc.Graph(id={'type': 'chart-output', 'index': chart_id}),
+            html.Div(id={'type': 'table-output', 'index': chart_id}),
+            html.Div(id={'type': 'kpi-output', 'index': chart_id})
+        ]),
+
+        html.Div(id={'type': 'total-responses', 'index': chart_id},
+                 style={"textAlign": "center", "color": "red", "fontSize": 16})
+
+    ], id={'type': 'chart-block', 'index': chart_id},
+       style={"border": "1px solid #ccc", "padding": "15px", "marginBottom": "20px", "borderRadius": "8px"})
+
+
+# ------------------ APP LAYOUT ------------------
+app.layout = html.Div([
+    html.H1("📊 Advanced Multi-Chart Viewer", style={"textAlign": "center"}),
+
+    html.Button("➕ Add Chart", id="add-chart-btn", n_clicks=0),
+
+    dcc.Store(id="chart-ids", data=[]),
+
+    html.Div(id='charts-container', children=[])
+])
+
+# ------------------ CALLBACKS ------------------
+
+# Manage chart IDs
+@app.callback(
+    Output("chart-ids", "data"),
+    Input("add-chart-btn", "n_clicks"),
+    Input({'type': 'remove-chart-btn', 'index': ALL}, "n_clicks"),
+    State("chart-ids", "data"),
+    prevent_initial_call=True
+)
+def manage_chart_ids(n_add, n_remove_list, chart_ids):
+    triggered = ctx.triggered_id
+    if not triggered:
+        return chart_ids
+
+    if triggered == "add-chart-btn":
+        return chart_ids + [str(uuid.uuid4())]
+
+    if isinstance(triggered, dict) and triggered.get("type") == "remove-chart-btn":
+        remove_id = triggered.get("index")
+        return [cid for cid in chart_ids if cid != remove_id]
+
+    return chart_ids
+
+
+# ------------------ FIXED CALLBACK — IMPORTANT ------------------
+# Render charts WITHOUT removing old ones
+@app.callback(
+    Output("charts-container", "children"),
+    Input("chart-ids", "data"),
+    State("charts-container", "children"),
+    prevent_initial_call=True
+)
+def render_charts(chart_ids, existing_charts):
+    if existing_charts is None:
+        existing_charts = []
+
+    existing_dict = {}
+    for chart in existing_charts:
+        try:
+            cid = chart['props']['id']['index']
+            existing_dict[cid] = chart
+        except:
+            pass
+
+    output_charts = []
+
+    for cid in chart_ids:
+        if cid in existing_dict:
+            output_charts.append(existing_dict[cid])
+        else:
+            output_charts.append(create_chart_block(cid))
+
+    return output_charts
+# ----------------------------------------------------------------
+
+
+# Update store
+@app.callback(
+    Output({'type': 'chart-store', 'index': MATCH}, 'data'),
+    Input({'type': 'columns-dropdown', 'index': MATCH}, 'value'),
+    Input({'type': 'chart-type-dropdown', 'index': MATCH}, 'value'),
+    Input({'type': 'value-mapping-input', 'index': MATCH}, 'value'),
+    Input({'type': 'color-input', 'index': MATCH}, 'value'),
+    Input({'type': 'value-filter-dropdown', 'index': MATCH}, 'value'),
+    Input({'type': 'display-mode-radio', 'index': MATCH}, 'value'),
+    State({'type': 'chart-store', 'index': MATCH}, 'data'),
+    prevent_initial_call=True
+)
+def update_chart_store(columns, chart_type, mapping, color_input, selected_values, display_mode, current_store):
+    current_store['selected_columns'] = columns
+    current_store['chart_type'] = chart_type
+    current_store['mapping'] = mapping
+    current_store['color_input'] = color_input
+    current_store['selected_values'] = selected_values
+    current_store['display_mode'] = display_mode
+    return current_store
+
+# Enforce 1 column for pie/donut/KPI
+@app.callback(
+    Output({'type': 'columns-dropdown', 'index': MATCH}, 'value'),
+    Input({'type': 'chart-type-dropdown', 'index': MATCH}, 'value'),
+    State({'type': 'columns-dropdown', 'index': MATCH}, 'value'),
+    prevent_initial_call=True
+)
+def enforce_single_column(chart_type, selected_columns):
+    if chart_type in ['pie','donut','kpi'] and len(selected_columns) > 1:
+        return [selected_columns[0]]
+    return selected_columns
+
+# Update filter dropdown
+@app.callback(
+    Output({'type': 'value-filter-dropdown', 'index': MATCH}, 'options'),
+    Input({'type': 'columns-dropdown', 'index': MATCH}, 'value'),
+    Input({'type': 'value-mapping-input', 'index': MATCH}, 'value')
+)
+def update_filter_dropdown(columns, mapping):
+    if not columns:
+        return []
+    value_map = {}
+    if mapping:
+        try:
+            for item in mapping.split(','):
+                if '=' in item:
+                    k, v = item.split('=')
+                    value_map[k.strip()] = v.strip()
+        except:
+            pass
+    values = set()
+    for col in columns:
+        col_data = df[col].dropna().astype(str)
+        if value_map:
+            col_data = col_data.map(value_map).fillna(col_data)
+        values.update(col_data.unique())
+    return [{"label": v, "value": v} for v in sorted(values)]
+
+# Update charts
+@app.callback(
+    Output({'type': 'chart-output', 'index': MATCH}, 'figure'),
+    Output({'type': 'table-output', 'index': MATCH}, 'children'),
+    Output({'type': 'kpi-output', 'index': MATCH}, 'children'),
+    Output({'type': 'total-responses', 'index': MATCH}, 'children'),
+    Input({'type': 'chart-store', 'index': MATCH}, 'data'),
+)
+def update_chart_from_store(store_data):
+
+    selected_columns = store_data['selected_columns']
+    chart_type = store_data['chart_type']
+    mapping = store_data['mapping']
+    color_input = store_data['color_input']
+    selected_values = store_data['selected_values']
+    display_mode = store_data['display_mode']
+
+    value_map = {}
+    if mapping:
+        for item in mapping.split(','):
+            if '=' in item:
+                k, v = item.split('=')
+                value_map[k.strip()] = v.strip()
+
+    user_colors = [c.strip() for c in color_input.split(',') if c.strip()] if color_input else px.colors.qualitative.Set3
+
+    combined_counts = pd.DataFrame()
+
+    for col in selected_columns:
+        original = df[col].dropna().astype(str)
+        if value_map:
+            original = original.map(value_map).fillna(original)
+
+        total_responses = len(original)
+
+        if selected_values:
+            filtered = original[original.isin(selected_values)]
+        else:
+            filtered = original
+
+        counts = filtered.value_counts().reset_index()
+        counts.columns = ['Value', 'Count']
+        counts['Column'] = col
+        counts['Total_In_Column'] = total_responses
+
+        if display_mode == 'percentage' and total_responses > 0:
+            counts['Percentage'] = (counts['Count'] / total_responses) * 100
+        else:
+            counts['Percentage'] = counts['Count']
+
+        combined_counts = pd.concat([combined_counts, counts], ignore_index=True)
+
+    total_text = f"Total Responses: {len(df)}"
+
+    # KPI Chart
+    if chart_type == 'kpi':
+        col = selected_columns[0]
+        kpi_data = combined_counts[combined_counts['Column'] == col]
+        kpi_value = kpi_data['Count'].sum()
+        return {}, "", html.Div([
+            html.H2(f"{col}", style={"textAlign": "center"}),
+            html.H1(f"{kpi_value:,}", style={"textAlign": "center", "color": "green"})
+        ]), total_text
+
+    # Table
+    if chart_type == 'table':
+        df_show = combined_counts.copy()
+        df_show['Percentage'] = df_show['Percentage'].round(2)
+        return {}, html.Table([
+            html.Thead(html.Tr([html.Th(c) for c in df_show.columns])),
+            html.Tbody([
+                html.Tr([html.Td(str(v)) for v in row])
+                for row in df_show.values
+            ])
+        ], style={"margin": "auto", "border": "1px solid gray"}), "", total_text
+
+    # Pie / Donut
+    if chart_type in ['pie', 'donut']:
+        pie_data = combined_counts[combined_counts['Column'] == selected_columns[0]]
+        hole = 0.5 if chart_type == 'donut' else 0
+        fig = px.pie(
+            pie_data,
+            names='Value',
+            values='Count',
+            hole=hole,
+            color_discrete_sequence=user_colors
+        )
+        fig.update_layout(title_x=0.5)
+        return fig, "", "", total_text
+
+    # Bar / Column
+    y_col = 'Percentage' if display_mode == 'percentage' else 'Count'
+    fig = px.bar(
+        combined_counts,
+        x='Value' if chart_type == 'column' else 'Column',
+        y=y_col,
+        color='Value',
+        barmode='group',
+        color_discrete_sequence=user_colors,
+        custom_data=['Percentage', 'Total_In_Column']
+    )
+    fig.update_layout(title_x=0.5)
+
+    return fig, "", "", total_text
+
+
+# ------------------ RUN APP ------------------
+if __name__ == '__main__':
+    app.run(debug=False, use_reloader=False)

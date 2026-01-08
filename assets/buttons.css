@@ -1,0 +1,79 @@
+button#add-chart-btn {
+    padding-left: 10px;
+    margin-left: 24px;
+    font-size: bold;
+    background:#ffffff;
+    color:black;
+
+}
+#add-chart-btn:hover{ 
+    background-color: #3eb1f3;
+    font-weight: 400;
+    color: white;
+}
+
+
+button#remove-global-filter-btn {
+    padding-left: 10px;
+    margin-left: 24px;
+    font-size: bold;
+    background:#ffffff;
+    color:black;
+}
+#remove-global-filter-btn:hover{ 
+    background-color: #3eb1f3;
+    font-weight: 400;
+    color: white;
+}
+
+button#show-global-filter-btn {
+    padding-left: 10px;
+    margin-left: 24px;
+    font-size: bold;
+    background:#ffffff;
+    color:black;
+}
+#show-global-filter-btn:hover{ 
+    background-color: #3eb1f3;
+    font-weight: 400;
+    color: white;
+}
+
+button#save-dashboard-btn {
+    padding-left: 10px;
+    margin-left: 24px;
+    font-size: bold;
+    background:#ffffff;
+    color:black;
+}
+#save-dashboard-btn:hover{ 
+    background-color: green;
+    font-weight: 400;
+    color: white;
+}
+button.upload-dashboard {
+    padding-left: 10px;
+    margin-left: 24px;
+    font-size: bold;
+    background:#ffffff;
+    color:black;
+}
+button.upload-dashboard:hover{ 
+    background-color:#3eb1f3;
+    font-weight: 400;
+    color: white;
+}
+
+
+button#logout-btn {
+    padding-left: 10px;
+    margin-left: 24px;
+    font-size: bold;
+    background:#ffffff;
+    color:black;
+}
+#logout-btn:hover{ 
+    background-color:red;
+    font-weight: 400;
+    color: white;
+}
