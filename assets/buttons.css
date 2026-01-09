@@ -1,9 +1,30 @@
+#Heading{
+    text-shadow: 1px 2px 5px Green;
+    text-align: center;
+    font-family: 'Arial Black', Gadget, sans-serif;
+}
+
+button#File-Choose-btn {
+    padding-left: 10px;
+    margin-left: 24px;
+    font-size: bold;
+    background:#ffffff;
+    color:black;
+    border-radius: 11px;
+}
+#File-Choose-btn:hover{ 
+    background-color: #3eb1f3;
+    font-weight: 400;
+    color: white;
+}
+
 button#add-chart-btn {
     padding-left: 10px;
     margin-left: 24px;
     font-size: bold;
     background:#ffffff;
     color:black;
+    border-radius: 11px;
 
 }
 #add-chart-btn:hover{ 
@@ -19,6 +40,7 @@ button#remove-global-filter-btn {
     font-size: bold;
     background:#ffffff;
     color:black;
+    border-radius: 11px;
 }
 #remove-global-filter-btn:hover{ 
     background-color: #3eb1f3;
@@ -32,6 +54,7 @@ button#show-global-filter-btn {
     font-size: bold;
     background:#ffffff;
     color:black;
+    border-radius: 11px;
 }
 #show-global-filter-btn:hover{ 
     background-color: #3eb1f3;
@@ -45,6 +68,7 @@ button#save-dashboard-btn {
     font-size: bold;
     background:#ffffff;
     color:black;
+    border-radius: 11px;
 }
 #save-dashboard-btn:hover{ 
     background-color: green;
@@ -57,6 +81,7 @@ button.upload-dashboard {
     font-size: bold;
     background:#ffffff;
     color:black;
+    border-radius: 11px;
 }
 button.upload-dashboard:hover{ 
     background-color:#3eb1f3;
@@ -66,12 +91,18 @@ button.upload-dashboard:hover{
 
 
 button#logout-btn {
+    position: fixed !important;        /* ✅ Fixed: Added !important */
+    /* top: 20px;                         ✅ Added: Vertical position */
+    right: 20px;    
     padding-left: 10px;
-    margin-left: 24px;
+    padding-right: 11px;
+    margin-left: 158px;
     font-size: bold;
     background:#ffffff;
     color:black;
+    border-radius: 11px;
 }
+
 #logout-btn:hover{ 
     background-color:red;
     font-weight: 400;
