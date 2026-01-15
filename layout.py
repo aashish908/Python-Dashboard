@@ -15,7 +15,7 @@ def dashboardaa_layout():
                 ),
                 style={
                     "textAlign": "center",
-                    "height": "8%",
+                    "height": "10%",
                 },
             ),
 
@@ -73,6 +73,7 @@ def dashboardaa_layout():
                     html.Button(
                         "Logout",
                         id="logout-btn",
+                        n_clicks=0,
                         className="logout-btn",
                     ),
                 ],
@@ -80,7 +81,7 @@ def dashboardaa_layout():
                     "display": "flex",
                     "alignItems": "center",
                     "gap": "10px",
-                    "height": "6%",
+                    "height": "8%",
                     "flexWrap": "wrap",
                 },
             ),
@@ -121,6 +122,6 @@ def dashboardaa_layout():
         ],
         style={
             "height": "100vh",
-            "overflow": "auto",  # page scroll here
+            "overflow": "hidden",  # page scroll here
         },
     )

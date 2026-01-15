@@ -9,6 +9,10 @@ app = Dash(
     suppress_callback_exceptions=True,  # 🔥 IMPORTANT
     external_stylesheets=[dbc.themes.BOOTSTRAP]
 )
+# Add this for better error handling
+app.config.suppress_callback_exceptions = True
+app.enable_dev_tools(debug=True)
+
 server = app.server
 app.title = "📊 Advanced Multi-Chart Viewer"
 

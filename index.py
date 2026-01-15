@@ -22,6 +22,7 @@ import save_dashboard
 
 from layout import dashboardaa_layout
 from login import login_layout
+import logout
 
 
 # -----------------------------
@@ -43,15 +44,23 @@ app.layout = html.Div([
     Input("session-user", "data")
 )
 def render_page(pathname, user):
+    print(f"ROUTING: pathname={pathname}, user={user}")
 
     if pathname in ["/", "/login"]:
-        return login_layout() if not user else dashboardaa_layout()
+        return login_layout()
 
     if pathname == "/app":
-        return dashboardaa_layout() if user else login_layout()
+        if user:
+            return dashboardaa_layout()
+        return login_layout()
 
     return html.H3("404 - Page not found")
 
 
+# if __name__ == "__main__":
+#     app.run(debug=False, use_reloader=False)
+
 if __name__ == "__main__":
-    app.run(debug=False, use_reloader=False)
+    print("Starting app...")
+    print(f"Registered callbacks: {len(app.callback_map)}")
+    app.run(debug=True, use_reloader=False, port=8050)
