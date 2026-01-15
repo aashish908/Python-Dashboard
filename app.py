@@ -4,7 +4,6 @@ import json
 import os
 import dash_bootstrap_components as dbc
 
-# app = dash.Dash(__name__)
 app = Dash(
     __name__,
     suppress_callback_exceptions=True,  # 🔥 IMPORTANT

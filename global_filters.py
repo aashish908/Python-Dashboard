@@ -48,19 +48,6 @@ def store_global_filter(column, values):
     Input("show-global-filter-btn", "n_clicks"),
 )
 
-# def toggle_global_filter(show_clicks, remove_clicks):
-#     trigger = ctx.triggered_id
-
-#     # 🌍 SHOW FILTER
-#     if trigger == "show-global-filter-btn":
-#         return {"display": "block"}, no_update
-
-#     # ❌ REMOVE FILTER
-#     if trigger == "remove-global-filter-btn":
-#         return {"display": "none"}, None   # clear filter data
-
-#     return no_update, no_update
-
 def toggle_global_filter(n):
     # ❌ No click → keep hidden
     if not n or n == 0:

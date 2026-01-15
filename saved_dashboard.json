@@ -1,4 +1,15 @@
 {
-    "charts": {},
+    "charts": {
+        "40e2766c-00c7-44b1-9808-cafbb2179f2f": {
+            "selected_columns": [
+                "Q2"
+            ],
+            "chart_type": "bar",
+            "mapping": null,
+            "color_input": null,
+            "selected_values": null,
+            "display_mode": "frequency"
+        }
+    },
     "global_filter": null
 }
