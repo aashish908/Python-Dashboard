@@ -43,10 +43,10 @@ def store_global_filter(column, values):
 # ----------------------------------------------------
 # ⭐ SHOW / HIDE THE GLOBAL FILTER BLOCK
 # ----------------------------------------------------
-@app.callback(
-    Output("global-filter-block", "style"),
-    Input("show-global-filter-btn", "n_clicks"),
-)
+# @app.callback(
+#     Output("global-filter-block", "style"),
+#     Input("show-global-filter-btn", "n_clicks"),
+# )
 
 def toggle_global_filter(n):
     # ❌ No click → keep hidden
@@ -62,3 +62,4 @@ def toggle_global_filter(n):
         "backgroundColor": "#eef7ff",
         "display": "block"
     }
+

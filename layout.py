@@ -43,6 +43,8 @@ def dashboardaa_layout():
                         id="show-global-filter-btn",
                         n_clicks=0,
                         className="global-filter-btn",
+                        style={"margin Bottom": "56px"},
+                        
                     ),
 
                     html.Button(
